@@ -8,23 +8,22 @@ import { useRouter } from 'next/navigation';
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+  const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
   const router = useRouter();
 
-  // Update handleSignIn function
   const handleSignIn = async () => {
     try {
       const res = await signInWithEmailAndPassword(email, password);
-      console.log({ res });
-      sessionStorage.setItem('user', email); // Store the email address
-      setEmail('');
-      setPassword('');
-      router.push('/');
+      if (res) {
+        sessionStorage.setItem('user', email); // Store the email address
+        setEmail('');
+        setPassword('');
+        router.push('/');
+      }
     } catch (e) {
       console.error(e);
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -44,11 +43,13 @@ const SignIn = () => {
           onChange={(e) => setPassword(e.target.value)} 
           className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
         />
+        {error && <p className="text-red-500">{error.message}</p>} {/* Display error message */}
         <button 
           onClick={handleSignIn}
           className="w-full p-3 bg-indigo-600 rounded text-white hover:bg-indigo-500"
+          disabled={loading} // Disable the button while loading
         >
-          Sign In
+          {loading ? 'Signing In...' : 'Sign In'}
         </button>
       </div>
     </div>
