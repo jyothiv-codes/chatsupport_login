@@ -1,10 +1,27 @@
 'use client';
 
-import { Box, Button, Stack } from '@mui/material';
+import { Box, Button, Stack, Tooltip, IconButton, Menu, MenuItem } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import the icon
+import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Use 'next/navigation' for App Router
 
-export default function Header() {
+export default function Header({ isLoggedIn, userEmail, onLogout }) {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
   const router = useRouter();
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    onLogout();
+  };
 
   const handleLogin = () => {
     router.push('/sign-in'); // Adjust the path if needed
@@ -25,12 +42,34 @@ export default function Header() {
       alignItems="center"
     >
       <Stack direction="row" spacing={2}>
-        <Button color="inherit" onClick={handleLogin}>
-          Login
-        </Button>
-        <Button color="inherit" onClick={handleSignUp}>
-          Sign Up
-        </Button>
+        {!isLoggedIn ? (
+          <>
+            <Button color="inherit" onClick={handleLogin}>
+              Login
+            </Button>
+            <Button color="inherit" onClick={handleSignUp}>
+              Sign Up
+            </Button>
+          </>
+        ) : (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Tooltip title={userEmail} arrow>
+              <IconButton color="inherit" onClick={handleMenuOpen}>
+                <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </Stack>
+        )}
       </Stack>
     </Box>
   );

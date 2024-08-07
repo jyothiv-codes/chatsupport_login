@@ -1,10 +1,9 @@
 'use client';
 
-import { Box, Button, Stack, TextField, Tooltip, IconButton } from '@mui/material';
+import { Box, Button, Stack, TextField } from '@mui/material';
 import { useState, useRef, useEffect } from 'react';
 import Header from './components/Header'; // Adjust import path as needed
 import { useRouter } from 'next/navigation';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import the icon
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -31,6 +30,13 @@ export default function Home() {
 
     checkLoginStatus();
   }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setUserEmail(''); // Clear the email
+    router.push('/sign-in'); // Redirect to the sign-in page
+  };
 
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return;
@@ -106,16 +112,7 @@ export default function Home() {
       flexDirection="column"
       bgcolor="white"
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" padding={2}>
-        {!isLoggedIn && <Header />}
-        {isLoggedIn && (
-          <Tooltip title={userEmail} arrow>
-            <IconButton sx={{ ml: 'auto' }}>
-              <AccountCircleIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Box>
+      <Header isLoggedIn={isLoggedIn} userEmail={userEmail} onLogout={handleLogout} />
       <Stack
         direction="column"
         width="100%"
