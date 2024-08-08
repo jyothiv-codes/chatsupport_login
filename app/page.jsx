@@ -188,7 +188,7 @@ export default function Home() {
                     bgcolor={
                       message.role === 'assistant'
                         ? 'primary.main'
-                        : '#4682B4' // Change this to 'lightblue'
+                        : '#6D6E70' // Change this to 'lightblue'
                     }
                     color="white"
                     borderRadius={16}

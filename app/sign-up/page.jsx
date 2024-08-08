@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/app/firebase/config';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
+import { Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
-  const router = useRouter(); // Initialize router
+  const [createUserWithEmailAndPassword, user, loading, error] = useCreateUserWithEmailAndPassword(auth);
+  const router = useRouter();
 
   const handleSignUp = async () => {
     try {
@@ -18,38 +19,59 @@ const SignUp = () => {
       sessionStorage.setItem('user', true);
       setEmail('');
       setPassword('');
-      router.push('/sign-in'); // Redirect to the sign-in page
+      router.push('/sign-in');
     } catch (e) {
       console.error(e);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-10 rounded-lg shadow-xl w-96">
-        <h1 className="text-white text-2xl mb-5">Sign Up</h1>
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+    <Box
+      minHeight="100vh"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      bgcolor="white"
+    >
+      <Box
+        bgcolor="grey.100"
+        p={4}
+        borderRadius={2}
+        boxShadow={3}
+        width={350}
+      >
+        <Typography variant="h4" color="textPrimary" mb={2}>Sign Up</Typography>
+        <TextField
+          type="email"
+          label="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          fullWidth
+          margin="normal"
+          variant="outlined"
         />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+        <TextField
+          type="password"
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          margin="normal"
+          variant="outlined"
         />
-        <button 
+        {error && <Typography color="error">{error.message}</Typography>}
+        <Button
           onClick={handleSignUp}
-          className="w-full p-3 bg-indigo-600 rounded text-white hover:bg-indigo-500"
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ mt: 2 }}
+          disabled={loading}
         >
-          Sign Up
-        </button>
-      </div>
-    </div>
+          {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
