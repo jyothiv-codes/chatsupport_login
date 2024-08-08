@@ -1,9 +1,10 @@
 'use client';
-
-import { Box, Button, Stack, TextField } from '@mui/material';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Box, Button, Stack, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Rating } from '@mui/material';
 import Header from './components/Header'; // Adjust import path as needed
 import { useRouter } from 'next/navigation';
+import { firestore } from './firebase/config'; // Adjust path if necessary
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -16,31 +17,28 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
 
   const router = useRouter();
 
   useEffect(() => {
     const checkLoginStatus = () => {
       const user = sessionStorage.getItem('user');
-      console.log('Retrieved user from session storage:', user); // Debugging log
       if (user) {
         setIsLoggedIn(true);
         setUserEmail(user);
-        console.log('User is logged in:', user);
-      } else {
-        console.log('No user found in session storage');
       }
     };
-  
+
     checkLoginStatus();
   }, []);
   
-
   const handleLogout = () => {
     sessionStorage.removeItem('user');
     setIsLoggedIn(false);
     setUserEmail('');
-    router.push('/sign-in'); // Redirect to the sign-in page
+    router.push('/sign-in');
   };
 
   const sendMessage = async () => {
@@ -109,6 +107,37 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
+  const handleFeedbackOpen = () => {
+    setOpenFeedbackDialog(true);
+  };
+
+  const handleFeedbackClose = () => {
+    setOpenFeedbackDialog(false);
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (feedbackRating > 0) {
+      try {
+        const userId = userEmail; // Use email as user ID
+        if (userId) {
+          const feedbackCollectionRef = collection(firestore, 'users', userId, 'feedback');
+          await addDoc(feedbackCollectionRef, {
+            rating: feedbackRating,
+            timestamp: Timestamp.fromDate(new Date()),
+          });
+          console.log('Feedback submitted successfully');
+        } else {
+          console.error('User ID is missing');
+        }
+      } catch (error) {
+        console.error('Error submitting feedback:', error);
+      }
+    } else {
+      console.error('Invalid feedback rating');
+    }
+    setOpenFeedbackDialog(false);
+  };
+
   return (
     <Box
       width="100vw"
@@ -159,7 +188,7 @@ export default function Home() {
                     bgcolor={
                       message.role === 'assistant'
                         ? 'primary.main'
-                        : 'secondary.main'
+                        : '#4682B4' // Change this to 'lightblue'
                     }
                     color="white"
                     borderRadius={16}
@@ -188,9 +217,41 @@ export default function Home() {
                 {isLoading ? 'Sending...' : 'Send'}
               </Button>
             </Stack>
+            <Button 
+              variant="outlined" 
+              onClick={handleFeedbackOpen} 
+              sx={{ marginTop: 2 }}
+            >
+              Provide Feedback
+            </Button>
           </Box>
         </Stack>
       )}
+      
+      {/* Feedback Dialog */}
+      <Dialog open={openFeedbackDialog} onClose={handleFeedbackClose}>
+        <DialogTitle>Provide Feedback</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Rating
+              name="feedback-rating"
+              value={feedbackRating}
+              onChange={(event, newValue) => setFeedbackRating(newValue)}
+              size="large"
+            />
+            <TextField
+              label="Additional Comments"
+              multiline
+              rows={4}
+              fullWidth
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleFeedbackClose}>Cancel</Button>
+          <Button onClick={handleFeedbackSubmit}>Submit</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
