@@ -15,26 +15,31 @@ export default function Home() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState(''); // Add state for email
+  const [userEmail, setUserEmail] = useState('');
 
   const router = useRouter();
 
   useEffect(() => {
     const checkLoginStatus = () => {
       const user = sessionStorage.getItem('user');
+      console.log('Retrieved user from session storage:', user); // Debugging log
       if (user) {
         setIsLoggedIn(true);
-        setUserEmail(user); // Set the email
+        setUserEmail(user);
+        console.log('User is logged in:', user);
+      } else {
+        console.log('No user found in session storage');
       }
     };
-
+  
     checkLoginStatus();
   }, []);
+  
 
   const handleLogout = () => {
     sessionStorage.removeItem('user');
     setIsLoggedIn(false);
-    setUserEmail(''); // Clear the email
+    setUserEmail('');
     router.push('/sign-in'); // Redirect to the sign-in page
   };
 
@@ -113,77 +118,79 @@ export default function Home() {
       bgcolor="white"
     >
       <Header isLoggedIn={isLoggedIn} userEmail={userEmail} onLogout={handleLogout} />
-      <Stack
-        direction="column"
-        width="100%"
-        height="calc(100% - 64px)"
-        maxWidth="600px"
-        margin="0 auto"
-        spacing={2}
-        padding={2}
-        overflow="hidden"
-      >
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="space-between"
-          height="100%"
-          bgcolor="white" // Set inside of the box to white
-          borderRadius={4}
+      {isLoggedIn && (
+        <Stack
+          direction="column"
+          width="100%"
+          height="calc(100% - 64px)"
+          maxWidth="600px"
+          margin="0 auto"
+          spacing={2}
           padding={2}
-          boxShadow={1}
-          border={1} // Add border property
-          borderColor="grey.500" // Set border color to grey
+          overflow="hidden"
         >
-          <Stack
-            direction="column"
-            spacing={2}
-            flexGrow={1}
-            overflow="auto"
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+            height="100%"
+            bgcolor="white"
+            borderRadius={4}
+            padding={2}
+            boxShadow={1}
+            border={1}
+            borderColor="grey.500"
           >
-            {messages.map((message, index) => (
-              <Box
-                key={index}
-                display="flex"
-                justifyContent={
-                  message.role === 'assistant' ? 'flex-start' : 'flex-end'
-                }
-              >
-                <Box
-                  bgcolor={
-                    message.role === 'assistant'
-                      ? 'primary.main'
-                      : 'secondary.main'
-                  }
-                  color="white"
-                  borderRadius={16}
-                  padding={2}
-                >
-                  {message.content}
-                </Box>
-              </Box>
-            ))}
-            <div ref={messagesEndRef} />
-          </Stack>
-          <Stack direction="row" spacing={2} alignItems="center" marginTop={2}>
-            <TextField
-              label="Message"
-              fullWidth
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-            />
-            <Button 
-              variant="contained" 
-              onClick={sendMessage}
-              disabled={isLoading}
+            <Stack
+              direction="column"
+              spacing={2}
+              flexGrow={1}
+              overflow="auto"
             >
-              {isLoading ? 'Sending...' : 'Send'}
-            </Button>
-          </Stack>
-        </Box>
-      </Stack>
+              {messages.map((message, index) => (
+                <Box
+                  key={index}
+                  display="flex"
+                  justifyContent={
+                    message.role === 'assistant' ? 'flex-start' : 'flex-end'
+                  }
+                >
+                  <Box
+                    bgcolor={
+                      message.role === 'assistant'
+                        ? 'primary.main'
+                        : 'secondary.main'
+                    }
+                    color="white"
+                    borderRadius={16}
+                    padding={2}
+                  >
+                    {message.content}
+                  </Box>
+                </Box>
+              ))}
+              <div ref={messagesEndRef} />
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center" marginTop={2}>
+              <TextField
+                label="Message"
+                fullWidth
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+              />
+              <Button 
+                variant="contained" 
+                onClick={sendMessage}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Send'}
+              </Button>
+            </Stack>
+          </Box>
+        </Stack>
+      )}
     </Box>
   );
 }

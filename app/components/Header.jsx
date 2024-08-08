@@ -1,9 +1,9 @@
 'use client';
 
 import { Box, Button, Stack, Tooltip, IconButton, Menu, MenuItem } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Import the icon
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Use 'next/navigation' for App Router
+import { useRouter } from 'next/navigation';
 
 export default function Header({ isLoggedIn, userEmail, onLogout }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,11 +24,11 @@ export default function Header({ isLoggedIn, userEmail, onLogout }) {
   };
 
   const handleLogin = () => {
-    router.push('/sign-in'); // Adjust the path if needed
+    router.push('/sign-in');
   };
 
   const handleSignUp = () => {
-    router.push('/sign-up'); // Adjust the path if you have a sign-up page
+    router.push('/sign-up');
   };
 
   return (
